@@ -36,7 +36,7 @@ class ForceSSLInterceptor {
 				return true
 			}
 		}
-		response.setHeader('Strict-Transport-Security','max-age=31536000')
+		response.setHeader('Strict-Transport-Security','max-age=31536000; includeSubDomains; preload; always;')
 		if(!(request.isSecure() || request.getHeader('X-Forwarded-Proto')?.toLowerCase() == 'https')) {
 			log.info("Forcing SSL Redirect To https://${request.serverName}${request.requestURI}")
 			//Persist Flash Scope
