@@ -1,42 +1,46 @@
 Grails Force SSL
 ================
 
-The Grails Force SSL Plugin provides an annotation for controllers to force ssl url endpoints. For example, you may want to restrict a shopping cart page or login page to SSL.
+The Grails Force SSL Plugin provides an annotation for controllers to force SSL URL endpoints. For example, you may want to restrict a shopping cart page or login page to SSL.
 
+Documentation
+-------------
+
+Full documentation is available on GitHub Pages:
+
+https://wondrify.github.io/grails-force-ssl/
+
+Quick Start
+-----------
+
+Add the dependency to your `build.gradle`:
+
+```groovy
+dependencies {
+    implementation 'cloud.wondrify:force-ssl:7.0.0'
+}
+```
 
 Configuration
 -------------
-By default, the SSL plugin is enabled for all environments, with the exception of `Development`. This can be overridden by adjusting your `Config.groovy`
-
-```groovy
-grails.plugin.forceSSL.enabled = false
-```
-
-### Grails 3
+By default, the SSL plugin is enabled for all environments, with the exception of `development`. This can be overridden in your `application.yml`:
 
 ```yaml
 grails:
     plugin:
         forceSSL:
             enabled: true
-```
-
-
-
-It is also possible to override the https port for the redirect if you want to via:
-
-```groovy
-grails.plugin.forceSSL.sslPort = 6443 //optional
+            sslPort: 443  # optional
 ```
 
 Usage
 -----
-Simply import the SSL annotation and apply at the controller level or at the annotation level.
+Simply import the SSL annotation and apply at the controller level or at the action level.
 
 ```groovy
 import com.bertramlabs.plugins.SSLRequired
 
-@SSLRequired //Will encrypt entire controller
+@SSLRequired //Will enforce SSL for entire controller
 class SessionController {
   @SSLRequired //Or here for action level
   def signin() {
@@ -45,18 +49,22 @@ class SessionController {
 }
 ```
 
-Another option is to use a configuration mapping to identify which controllers you wish to be restricted to SSL:
+Another option is to use a configuration mapping to identify which URLs you wish to be restricted to SSL:
 
 ```groovy
-  grails {
+grails {
     plugin {
-      forceSSL {
-        enabled = true
-        dashboard {
-          index = true
+        forceSSL {
+            enabled = true
+            interceptUrlMap = [
+                '/dashboard/index': true,
+                '/checkout': true
+            ]
         }
-        home = true
-      }
-    }       
-  }
+    }
+}
 ```
+
+Contributions
+-------------
+All contributions are welcome. Please file issues at https://github.com/wondrify/grails-force-ssl/issues

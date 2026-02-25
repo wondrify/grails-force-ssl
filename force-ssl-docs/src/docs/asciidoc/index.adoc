@@ -1,0 +1,144 @@
+= Grails Force SSL Plugin Documentation
+:toc: left
+:toclevels: 3
+:source-highlighter: coderay
+:icons: font
+
+== Introduction
+
+The Grails Force SSL Plugin provides an annotation-based approach and configuration-based approach for forcing SSL on controller endpoints. This is useful for restricting pages such as login forms, shopping carts, or account management to HTTPS connections.
+
+=== Key Features
+
+* *Annotation-based SSL*: Use `@SSLRequired` on controllers or individual actions
+* *Configuration-based SSL*: Map specific URLs to require SSL via configuration
+* *Automatic Redirect*: Automatically redirects HTTP requests to HTTPS
+* *HSTS Support*: Sets `Strict-Transport-Security` headers on SSL-required endpoints
+* *Flash Scope Preservation*: Flash scope is preserved across SSL redirects
+* *X-Forwarded-Proto Aware*: Works behind reverse proxies and load balancers
+* *Environment Defaults*: Disabled by default in development mode
+
+== Installation
+
+Add the plugin to your `build.gradle`:
+
+[source,groovy]
+----
+dependencies {
+    implementation 'cloud.wondrify:force-ssl:{project-version}'
+}
+----
+
+== Configuration
+
+By default, the SSL plugin is enabled for all environments except `development`. This can be overridden in your configuration.
+
+=== YAML Configuration (application.yml)
+
+[source,yaml]
+----
+grails:
+    plugin:
+        forceSSL:
+            enabled: true
+            sslPort: 443          # Optional: override HTTPS port
+----
+
+=== Groovy Configuration (application.groovy)
+
+[source,groovy]
+----
+grails.plugin.forceSSL.enabled = true
+grails.plugin.forceSSL.sslPort = 443 // Optional
+----
+
+=== Configuration Options
+
+* *enabled*: Boolean to enable/disable SSL enforcement (default: `true` in production, `false` in development)
+* *sslPort*: Optional integer to specify a custom HTTPS port for redirects
+
+== Usage
+
+=== Annotation-Based SSL
+
+Import the `@SSLRequired` annotation and apply it at the controller or action level:
+
+[source,groovy]
+----
+import com.bertramlabs.plugins.SSLRequired
+
+@SSLRequired // Forces SSL for the entire controller
+class SessionController {
+
+    def signin() {
+        // This action requires HTTPS
+    }
+
+    def publicPage() {
+        // This action also requires HTTPS (controller-level annotation)
+    }
+}
+----
+
+Apply at the action level for more granular control:
+
+[source,groovy]
+----
+import com.bertramlabs.plugins.SSLRequired
+
+class AccountController {
+
+    @SSLRequired // Only this action requires SSL
+    def changePassword() {
+        // Sensitive operation - SSL required
+    }
+
+    def profile() {
+        // This action does NOT require SSL
+    }
+}
+----
+
+=== Configuration-Based SSL
+
+You can also map URLs to require SSL via configuration, without modifying controller code:
+
+[source,groovy]
+----
+grails {
+    plugin {
+        forceSSL {
+            enabled = true
+            interceptUrlMap = [
+                '/dashboard/index': true,
+                '/checkout':        true,
+                '/account':         true
+            ]
+        }
+    }
+}
+----
+
+== How It Works
+
+The plugin registers an interceptor (`ForceSSLInterceptor`) at the highest precedence that runs before every controller action. When a request is made:
+
+1. The interceptor checks if the plugin is enabled
+2. It looks for the `@SSLRequired` annotation on the action method, then the controller class
+3. If no annotation is found, it checks the `interceptUrlMap` configuration
+4. If SSL is required, it sets the `Strict-Transport-Security` header
+5. If the request is not secure (checking both `request.isSecure()` and the `X-Forwarded-Proto` header), it redirects to the HTTPS URL
+6. Flash scope is preserved across the redirect
+
+== Reverse Proxy Support
+
+The plugin checks the `X-Forwarded-Proto` header, so it works correctly behind reverse proxies and load balancers that terminate SSL. If the proxy sets `X-Forwarded-Proto: https`, the plugin will not redirect even though the backend connection is plain HTTP.
+
+== Getting Help
+
+* GitHub Issues: https://github.com/wondrify/grails-force-ssl
+* Documentation: https://wondrify.github.io/grails-force-ssl/
+
+== License
+
+Grails Force SSL is open source software licensed under the Apache License 2.0.

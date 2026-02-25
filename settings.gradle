@@ -1,1 +1,2 @@
+include 'force-ssl-docs'
 rootProject.name = 'force-ssl'

@@ -7,7 +7,7 @@ group "cloud.wondrify"
 
 ext {
   pomDescription = 'Grails Force SSL Interceptor and Controller Annotation.'
-  publishedProjects = [project.name]
+  publishedProjects = [rootProject.name]
 }
 
 configurations {

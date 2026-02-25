@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - '[4-9]+.[0-9]+.x'
-      - 'grails7'
       - 'master'
   pull_request:
 jobs:
